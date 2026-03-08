@@ -4,16 +4,15 @@
 from __future__ import annotations
 
 import json
-import os
 from pathlib import Path
 from typing import Any
 
 import requests
-from dotenv import load_dotenv
 
 OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
 MODEL_NAME = "openai/gpt-4o-mini"
 MAX_TOKENS = 1000
+OPENROUTER_API_KEY = "REPLACE_WITH_YOUR_OPENROUTER_API_KEY"
 
 
 def load_json(path: Path) -> dict[str, Any]:
@@ -50,11 +49,10 @@ def call_openrouter(api_key: str, prompt: str) -> str:
 
 
 def main() -> None:
-    load_dotenv()
-    api_key = os.getenv("OPENROUTER_API_KEY")
+    api_key = OPENROUTER_API_KEY
 
-    if not api_key:
-        raise RuntimeError("OPENROUTER_API_KEY is not set. Add it to your environment or .env file.")
+    if not api_key or api_key == "REPLACE_WITH_YOUR_OPENROUTER_API_KEY":
+        raise RuntimeError("Set OPENROUTER_API_KEY directly in scripts/run_tests.py before running tests.")
 
     project_root = Path(__file__).resolve().parents[1]
     prompts_path = project_root / "prompts" / "prompts.json"

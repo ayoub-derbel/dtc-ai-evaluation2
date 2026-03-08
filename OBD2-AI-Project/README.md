@@ -29,19 +29,16 @@ pip install -r requirements.txt
 ```
 
 ## Configure `OPENROUTER_API_KEY`
-Set your API key in one of the following ways.
+Set your API key directly in the script:
 
-### Option A: Environment variable
-```bash
-export OPENROUTER_API_KEY="your_openrouter_api_key"
+1. Open `scripts/run_tests.py`
+2. Replace:
+
+```python
+OPENROUTER_API_KEY = "REPLACE_WITH_YOUR_OPENROUTER_API_KEY"
 ```
 
-### Option B: `.env` file
-Create a `.env` file in the project root (`OBD2-AI-Project/.env`):
-
-```env
-OPENROUTER_API_KEY=your_openrouter_api_key
-```
+with your real key.
 
 ## Run Benchmark Tests
 From inside the `OBD2-AI-Project` directory, run:
