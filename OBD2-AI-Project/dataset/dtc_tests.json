@@ -1,0 +1,10 @@
+{
+  "tests": [
+    {"vehicle": "Toyota Corolla 2018", "dtc": "P0300"},
+    {"vehicle": "Volkswagen Golf 2019", "dtc": "P0300"},
+    {"vehicle": "Ford Focus 2018", "dtc": "P0300"},
+    {"vehicle": "Toyota Corolla 2018", "dtc": "P0171"},
+    {"vehicle": "Volkswagen Golf 2019", "dtc": "P0171"},
+    {"vehicle": "Ford Focus 2018", "dtc": "P0171"}
+  ]
+}
