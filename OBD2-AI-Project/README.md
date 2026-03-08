@@ -50,9 +50,10 @@ python scripts/run_tests.py
 The script will:
 - load prompt strategies from `prompts/prompts.json`
 - load test cases from `dataset/dtc_tests.json`
-- send each prompt-test combination to OpenRouter (`openai/gpt-4o-mini`)
+- send each prompt-test combination to OpenRouter (`openai/gpt-4o`)
 - print detailed runtime logs
 - write all outputs to `results/responses.json`
+- generate a readable PDF report at `results/responses_report.pdf` containing each prompt and associated response
 
 ## GitHub Push Commands
 After creating your GitHub repository, run:

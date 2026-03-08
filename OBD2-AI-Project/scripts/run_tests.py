@@ -8,9 +8,11 @@ from pathlib import Path
 from typing import Any
 
 import requests
+from reportlab.lib.pagesizes import A4
+from reportlab.pdfgen import canvas
 
 OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
-MODEL_NAME = "openai/gpt-4o-mini"
+MODEL_NAME = "openai/gpt-4o"
 MAX_TOKENS = 1000
 OPENROUTER_API_KEY = "REPLACE_WITH_YOUR_OPENROUTER_API_KEY"
 
@@ -31,9 +33,7 @@ def call_openrouter(api_key: str, prompt: str) -> str:
     payload = {
         "model": MODEL_NAME,
         "max_tokens": MAX_TOKENS,
-        "messages": [
-            {"role": "user", "content": prompt},
-        ],
+        "messages": [{"role": "user", "content": prompt}],
     }
 
     response = requests.post(
@@ -48,6 +48,64 @@ def call_openrouter(api_key: str, prompt: str) -> str:
     return data["choices"][0]["message"]["content"].strip()
 
 
+def wrap_text(text: str, max_chars: int = 110) -> list[str]:
+    lines: list[str] = []
+    for raw_line in text.splitlines() or [""]:
+        words = raw_line.split()
+        if not words:
+            lines.append("")
+            continue
+
+        current = words[0]
+        for word in words[1:]:
+            trial = f"{current} {word}"
+            if len(trial) <= max_chars:
+                current = trial
+            else:
+                lines.append(current)
+                current = word
+        lines.append(current)
+    return lines
+
+
+def export_pdf(results: list[dict[str, str]], pdf_path: Path) -> None:
+    pdf = canvas.Canvas(str(pdf_path), pagesize=A4)
+    width, height = A4
+    x_margin = 40
+    y = height - 40
+
+    pdf.setFont("Helvetica-Bold", 14)
+    pdf.drawString(x_margin, y, "OBD2 AI Benchmark Report")
+    y -= 24
+
+    for index, item in enumerate(results, start=1):
+        sections = [
+            f"Test #{index}",
+            f"Prompt ID: {item['prompt_id']}",
+            f"Vehicle: {item['vehicle']}",
+            f"DTC: {item['dtc']}",
+            f"Model: {item['model']}",
+            "Prompt sent:",
+            item["prompt"],
+            "Response received:",
+            item["response"],
+            "-" * 90,
+        ]
+
+        for section in sections:
+            for line in wrap_text(section):
+                if y <= 40:
+                    pdf.showPage()
+                    y = height - 40
+                    pdf.setFont("Helvetica", 10)
+                pdf.setFont("Helvetica", 10)
+                pdf.drawString(x_margin, y, line)
+                y -= 14
+        y -= 8
+
+    pdf.save()
+
+
 def main() -> None:
     api_key = OPENROUTER_API_KEY
 
@@ -58,6 +116,7 @@ def main() -> None:
     prompts_path = project_root / "prompts" / "prompts.json"
     tests_path = project_root / "dataset" / "dtc_tests.json"
     results_path = project_root / "results" / "responses.json"
+    pdf_path = project_root / "results" / "responses_report.pdf"
 
     prompts_data = load_json(prompts_path)
     tests_data = load_json(tests_path)
@@ -74,7 +133,12 @@ def main() -> None:
         for test_case in tests:
             vehicle = test_case["vehicle"]
             dtc_code = test_case["dtc"]
-            prompt_text = prompt_template.format(vehicle=vehicle, dtc_code=dtc_code)
+            prompt_text = prompt_template.format(
+                vehicle=vehicle,
+                model=vehicle,
+                dtc=dtc_code,
+                dtc_code=dtc_code,
+            )
 
             print("Running test")
             print(f"Prompt: {prompt_id}")
@@ -97,6 +161,7 @@ def main() -> None:
             all_results.append(
                 {
                     "prompt_id": prompt_id,
+                    "prompt_template": prompt_template,
                     "vehicle": vehicle,
                     "dtc": dtc_code,
                     "model": MODEL_NAME,
@@ -109,7 +174,10 @@ def main() -> None:
     with results_path.open("w", encoding="utf-8") as file:
         json.dump({"results": all_results}, file, indent=2)
 
+    export_pdf(all_results, pdf_path)
+
     print(f"Saved {len(all_results)} results to {results_path}")
+    print(f"Saved PDF report to {pdf_path}")
 
 
 if __name__ == "__main__":
