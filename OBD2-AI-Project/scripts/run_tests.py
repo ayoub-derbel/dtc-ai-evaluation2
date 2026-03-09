@@ -48,6 +48,32 @@ def call_openrouter(api_key: str, prompt: str) -> str:
     return data["choices"][0]["message"]["content"].strip()
 
 
+def render_prompt(prompt_template: str, vehicle: str, dtc_code: str) -> str:
+    """Render known placeholders without using str.format() to avoid JSON brace collisions."""
+    return (
+        prompt_template.replace("{vehicle}", vehicle)
+        .replace("{model}", vehicle)
+        .replace("{dtc}", dtc_code)
+        .replace("{dtc_code}", dtc_code)
+    )
+
+
+def ask_continue_or_stop() -> bool:
+    """Return True to continue tests, False to stop and save current outputs."""
+    print("An API error occurred.")
+    print("Choose an option:")
+    print("1) Continue testing")
+    print("2) Stop now and generate responses.json + PDF with current results")
+
+    while True:
+        choice = input("Enter 1 or 2: ").strip()
+        if choice == "1":
+            return True
+        if choice == "2":
+            return False
+        print("Invalid choice. Please enter 1 (continue) or 2 (stop).")
+
+
 def wrap_text(text: str, max_chars: int = 110) -> list[str]:
     lines: list[str] = []
     for raw_line in text.splitlines() or [""]:
@@ -70,7 +96,7 @@ def wrap_text(text: str, max_chars: int = 110) -> list[str]:
 
 def export_pdf(results: list[dict[str, str]], pdf_path: Path) -> None:
     pdf = canvas.Canvas(str(pdf_path), pagesize=A4)
-    width, height = A4
+    _, height = A4
     x_margin = 40
     y = height - 40
 
@@ -97,13 +123,20 @@ def export_pdf(results: list[dict[str, str]], pdf_path: Path) -> None:
                 if y <= 40:
                     pdf.showPage()
                     y = height - 40
-                    pdf.setFont("Helvetica", 10)
                 pdf.setFont("Helvetica", 10)
                 pdf.drawString(x_margin, y, line)
                 y -= 14
         y -= 8
 
     pdf.save()
+
+
+def save_outputs(results: list[dict[str, str]], results_path: Path, pdf_path: Path) -> None:
+    results_path.parent.mkdir(parents=True, exist_ok=True)
+    with results_path.open("w", encoding="utf-8") as file:
+        json.dump({"results": results}, file, indent=2)
+
+    export_pdf(results, pdf_path)
 
 
 def main() -> None:
@@ -125,20 +158,19 @@ def main() -> None:
     tests = tests_data.get("tests", [])
 
     all_results: list[dict[str, str]] = []
+    stop_requested = False
 
     for prompt_item in prompts:
+        if stop_requested:
+            break
+
         prompt_id = prompt_item["id"]
         prompt_template = prompt_item["content"]
 
         for test_case in tests:
             vehicle = test_case["vehicle"]
             dtc_code = test_case["dtc"]
-            prompt_text = prompt_template.format(
-                vehicle=vehicle,
-                model=vehicle,
-                dtc=dtc_code,
-                dtc_code=dtc_code,
-            )
+            prompt_text = render_prompt(prompt_template, vehicle, dtc_code)
 
             print("Running test")
             print(f"Prompt: {prompt_id}")
@@ -153,6 +185,27 @@ def main() -> None:
                 response_text = call_openrouter(api_key, prompt_text)
             except requests.RequestException as exc:
                 response_text = f"ERROR: {exc}"
+                print("Response received:")
+                print(response_text)
+                print("\n" + "-" * 80 + "\n")
+
+                all_results.append(
+                    {
+                        "prompt_id": prompt_id,
+                        "prompt_template": prompt_template,
+                        "vehicle": vehicle,
+                        "dtc": dtc_code,
+                        "model": MODEL_NAME,
+                        "prompt": prompt_text,
+                        "response": response_text,
+                    }
+                )
+
+                if ask_continue_or_stop():
+                    continue
+
+                stop_requested = True
+                break
 
             print("Response received:")
             print(response_text)
@@ -170,11 +223,7 @@ def main() -> None:
                 }
             )
 
-    results_path.parent.mkdir(parents=True, exist_ok=True)
-    with results_path.open("w", encoding="utf-8") as file:
-        json.dump({"results": all_results}, file, indent=2)
-
-    export_pdf(all_results, pdf_path)
+    save_outputs(all_results, results_path, pdf_path)
 
     print(f"Saved {len(all_results)} results to {results_path}")
     print(f"Saved PDF report to {pdf_path}")

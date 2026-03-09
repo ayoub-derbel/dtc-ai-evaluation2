@@ -54,6 +54,7 @@ The script will:
 - print detailed runtime logs
 - write all outputs to `results/responses.json`
 - generate a readable PDF report at `results/responses_report.pdf` containing each prompt and associated response
+- on API errors (e.g., 402 Payment Required), asks whether to continue or stop and save partial outputs
 
 ## GitHub Push Commands
 After creating your GitHub repository, run:
