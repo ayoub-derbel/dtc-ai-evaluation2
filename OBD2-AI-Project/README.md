@@ -50,9 +50,9 @@ python scripts/run_tests.py
 The script will:
 - load prompt strategies from `prompts/prompts.json`
 - load test cases from `dataset/dtc_tests.json`
-- send each prompt-test combination to OpenRouter (`openai/gpt-4o`)
+- send each prompt-test combination to OpenRouter for both models: `openai/gpt-4o` and `deepseek/deepseek-r1` (`deepseek-reasoner`)
 - print detailed runtime logs
-- write all outputs to `results/responses.json`
+- write all outputs to `results/responses.json` (including prompt, model label, and API model for each response)
 - generate a readable PDF report at `results/responses_report.pdf` containing each prompt and associated response
 - on API errors (e.g., 402 Payment Required), asks whether to continue or stop and save partial outputs
 

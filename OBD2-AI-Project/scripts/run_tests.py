@@ -12,9 +12,12 @@ from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
 
 OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
-MODEL_NAME = "openai/gpt-4o"
 MAX_TOKENS = 1000
 OPENROUTER_API_KEY = "REPLACE_WITH_YOUR_OPENROUTER_API_KEY"
+MODEL_MATRIX = [
+    {"label": "gpt-4o", "api_model": "openai/gpt-4o"},
+    {"label": "deepseek-reasoner", "api_model": "deepseek/deepseek-r1"},
+]
 
 
 def load_json(path: Path) -> dict[str, Any]:
@@ -22,7 +25,7 @@ def load_json(path: Path) -> dict[str, Any]:
         return json.load(file)
 
 
-def call_openrouter(api_key: str, prompt: str) -> str:
+def call_openrouter(api_key: str, prompt: str, model_name: str) -> str:
     headers = {
         "Authorization": f"Bearer {api_key}",
         "Content-Type": "application/json",
@@ -31,7 +34,7 @@ def call_openrouter(api_key: str, prompt: str) -> str:
     }
 
     payload = {
-        "model": MODEL_NAME,
+        "model": model_name,
         "max_tokens": MAX_TOKENS,
         "messages": [{"role": "user", "content": prompt}],
     }
@@ -110,7 +113,8 @@ def export_pdf(results: list[dict[str, str]], pdf_path: Path) -> None:
             f"Prompt ID: {item['prompt_id']}",
             f"Vehicle: {item['vehicle']}",
             f"DTC: {item['dtc']}",
-            f"Model: {item['model']}",
+            f"Model label: {item['model_label']}",
+            f"API model: {item['api_model']}",
             "Prompt sent:",
             item["prompt"],
             "Response received:",
@@ -160,31 +164,62 @@ def main() -> None:
     all_results: list[dict[str, str]] = []
     stop_requested = False
 
-    for prompt_item in prompts:
+    for model_config in MODEL_MATRIX:
         if stop_requested:
             break
 
-        prompt_id = prompt_item["id"]
-        prompt_template = prompt_item["content"]
+        model_label = model_config["label"]
+        api_model = model_config["api_model"]
 
-        for test_case in tests:
-            vehicle = test_case["vehicle"]
-            dtc_code = test_case["dtc"]
-            prompt_text = render_prompt(prompt_template, vehicle, dtc_code)
+        for prompt_item in prompts:
+            if stop_requested:
+                break
 
-            print("Running test")
-            print(f"Prompt: {prompt_id}")
-            print(f"Vehicle: {vehicle}")
-            print(f"DTC: {dtc_code}")
-            print(f"Model: {MODEL_NAME}\n")
-            print("Prompt sent:")
-            print(prompt_text)
-            print()
+            prompt_id = prompt_item["id"]
+            prompt_template = prompt_item["content"]
 
-            try:
-                response_text = call_openrouter(api_key, prompt_text)
-            except requests.RequestException as exc:
-                response_text = f"ERROR: {exc}"
+            for test_case in tests:
+                vehicle = test_case["vehicle"]
+                dtc_code = test_case["dtc"]
+                prompt_text = render_prompt(prompt_template, vehicle, dtc_code)
+
+                print("Running test")
+                print(f"Prompt: {prompt_id}")
+                print(f"Vehicle: {vehicle}")
+                print(f"DTC: {dtc_code}")
+                print(f"Model label: {model_label}")
+                print(f"API model: {api_model}\n")
+                print("Prompt sent:")
+                print(prompt_text)
+                print()
+
+                try:
+                    response_text = call_openrouter(api_key, prompt_text, api_model)
+                except requests.RequestException as exc:
+                    response_text = f"ERROR: {exc}"
+                    print("Response received:")
+                    print(response_text)
+                    print("\n" + "-" * 80 + "\n")
+
+                    all_results.append(
+                        {
+                            "prompt_id": prompt_id,
+                            "prompt_template": prompt_template,
+                            "vehicle": vehicle,
+                            "dtc": dtc_code,
+                            "model_label": model_label,
+                            "api_model": api_model,
+                            "prompt": prompt_text,
+                            "response": response_text,
+                        }
+                    )
+
+                    if ask_continue_or_stop():
+                        continue
+
+                    stop_requested = True
+                    break
+
                 print("Response received:")
                 print(response_text)
                 print("\n" + "-" * 80 + "\n")
@@ -195,33 +230,12 @@ def main() -> None:
                         "prompt_template": prompt_template,
                         "vehicle": vehicle,
                         "dtc": dtc_code,
-                        "model": MODEL_NAME,
+                        "model_label": model_label,
+                        "api_model": api_model,
                         "prompt": prompt_text,
                         "response": response_text,
                     }
                 )
-
-                if ask_continue_or_stop():
-                    continue
-
-                stop_requested = True
-                break
-
-            print("Response received:")
-            print(response_text)
-            print("\n" + "-" * 80 + "\n")
-
-            all_results.append(
-                {
-                    "prompt_id": prompt_id,
-                    "prompt_template": prompt_template,
-                    "vehicle": vehicle,
-                    "dtc": dtc_code,
-                    "model": MODEL_NAME,
-                    "prompt": prompt_text,
-                    "response": response_text,
-                }
-            )
 
     save_outputs(all_results, results_path, pdf_path)
 
