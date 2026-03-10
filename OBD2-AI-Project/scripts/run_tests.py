@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run prompt benchmarking tests for OBD-II diagnostics via OpenRouter."""
+"""Run prompt benchmarking tests for OBD-II diagnostics via OpenRouter and DeepSeek."""
 
 from __future__ import annotations
 
@@ -12,11 +12,21 @@ from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
 
 OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
+DEEPSEEK_URL = "https://api.deepseek.com/chat/completions"
 MAX_TOKENS = 1000
 OPENROUTER_API_KEY = "REPLACE_WITH_YOUR_OPENROUTER_API_KEY"
+DEEPSEEK_API_KEY = "REPLACE_WITH_YOUR_DEEPSEEK_API_KEY"
 MODEL_MATRIX = [
-    {"label": "gpt-4o", "api_model": "openai/gpt-4o"},
-    {"label": "deepseek-reasoner", "api_model": "deepseek/deepseek-r1"},
+    {
+        "label": "gpt-4o",
+        "provider": "openrouter",
+        "api_model": "openai/gpt-4o",
+    },
+    {
+        "label": "deepseek-reasoner",
+        "provider": "deepseek",
+        "api_model": "deepseek-reasoner",
+    },
 ]
 
 
@@ -32,27 +42,44 @@ def call_openrouter(api_key: str, prompt: str, model_name: str) -> str:
         "HTTP-Referer": "http://localhost",
         "X-Title": "OBD2-AI-Test",
     }
-
     payload = {
         "model": model_name,
         "max_tokens": MAX_TOKENS,
         "messages": [{"role": "user", "content": prompt}],
     }
 
-    response = requests.post(
-        OPENROUTER_URL,
-        headers=headers,
-        json=payload,
-        timeout=60,
-    )
+    response = requests.post(OPENROUTER_URL, headers=headers, json=payload, timeout=60)
     response.raise_for_status()
-
     data = response.json()
     return data["choices"][0]["message"]["content"].strip()
 
 
+def call_deepseek(api_key: str, prompt: str, model_name: str) -> str:
+    headers = {
+        "Authorization": f"Bearer {api_key}",
+        "Content-Type": "application/json",
+    }
+    payload = {
+        "model": model_name,
+        "max_tokens": MAX_TOKENS,
+        "messages": [{"role": "user", "content": prompt}],
+    }
+
+    response = requests.post(DEEPSEEK_URL, headers=headers, json=payload, timeout=60)
+    response.raise_for_status()
+    data = response.json()
+    return data["choices"][0]["message"]["content"].strip()
+
+
+def call_model(provider: str, prompt: str, model_name: str, openrouter_key: str, deepseek_key: str) -> str:
+    if provider == "openrouter":
+        return call_openrouter(openrouter_key, prompt, model_name)
+    if provider == "deepseek":
+        return call_deepseek(deepseek_key, prompt, model_name)
+    raise ValueError(f"Unsupported provider: {provider}")
+
+
 def render_prompt(prompt_template: str, vehicle: str, dtc_code: str) -> str:
-    """Render known placeholders without using str.format() to avoid JSON brace collisions."""
     return (
         prompt_template.replace("{vehicle}", vehicle)
         .replace("{model}", vehicle)
@@ -62,7 +89,6 @@ def render_prompt(prompt_template: str, vehicle: str, dtc_code: str) -> str:
 
 
 def ask_continue_or_stop() -> bool:
-    """Return True to continue tests, False to stop and save current outputs."""
     print("An API error occurred.")
     print("Choose an option:")
     print("1) Continue testing")
@@ -113,6 +139,7 @@ def export_pdf(results: list[dict[str, str]], pdf_path: Path) -> None:
             f"Prompt ID: {item['prompt_id']}",
             f"Vehicle: {item['vehicle']}",
             f"DTC: {item['dtc']}",
+            f"Provider: {item['provider']}",
             f"Model label: {item['model_label']}",
             f"API model: {item['api_model']}",
             "Prompt sent:",
@@ -144,10 +171,11 @@ def save_outputs(results: list[dict[str, str]], results_path: Path, pdf_path: Pa
 
 
 def main() -> None:
-    api_key = OPENROUTER_API_KEY
-
-    if not api_key or api_key == "REPLACE_WITH_YOUR_OPENROUTER_API_KEY":
+    if not OPENROUTER_API_KEY or OPENROUTER_API_KEY == "REPLACE_WITH_YOUR_OPENROUTER_API_KEY":
         raise RuntimeError("Set OPENROUTER_API_KEY directly in scripts/run_tests.py before running tests.")
+
+    if not DEEPSEEK_API_KEY or DEEPSEEK_API_KEY == "REPLACE_WITH_YOUR_DEEPSEEK_API_KEY":
+        raise RuntimeError("Set DEEPSEEK_API_KEY directly in scripts/run_tests.py before running tests.")
 
     project_root = Path(__file__).resolve().parents[1]
     prompts_path = project_root / "prompts" / "prompts.json"
@@ -169,6 +197,7 @@ def main() -> None:
             break
 
         model_label = model_config["label"]
+        provider = model_config["provider"]
         api_model = model_config["api_model"]
 
         for prompt_item in prompts:
@@ -187,6 +216,7 @@ def main() -> None:
                 print(f"Prompt: {prompt_id}")
                 print(f"Vehicle: {vehicle}")
                 print(f"DTC: {dtc_code}")
+                print(f"Provider: {provider}")
                 print(f"Model label: {model_label}")
                 print(f"API model: {api_model}\n")
                 print("Prompt sent:")
@@ -194,7 +224,13 @@ def main() -> None:
                 print()
 
                 try:
-                    response_text = call_openrouter(api_key, prompt_text, api_model)
+                    response_text = call_model(
+                        provider=provider,
+                        prompt=prompt_text,
+                        model_name=api_model,
+                        openrouter_key=OPENROUTER_API_KEY,
+                        deepseek_key=DEEPSEEK_API_KEY,
+                    )
                 except requests.RequestException as exc:
                     response_text = f"ERROR: {exc}"
                     print("Response received:")
@@ -207,6 +243,7 @@ def main() -> None:
                             "prompt_template": prompt_template,
                             "vehicle": vehicle,
                             "dtc": dtc_code,
+                            "provider": provider,
                             "model_label": model_label,
                             "api_model": api_model,
                             "prompt": prompt_text,
@@ -230,6 +267,7 @@ def main() -> None:
                         "prompt_template": prompt_template,
                         "vehicle": vehicle,
                         "dtc": dtc_code,
+                        "provider": provider,
                         "model_label": model_label,
                         "api_model": api_model,
                         "prompt": prompt_text,
