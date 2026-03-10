@@ -1,10 +1,124 @@
 {
   "tests": [
-    {"vehicle": "Toyota Corolla 2018", "dtc": "P0300"},
-    {"vehicle": "Volkswagen Golf 2019", "dtc": "P0300"},
-    {"vehicle": "Ford Focus 2018", "dtc": "P0300"},
-    {"vehicle": "Toyota Corolla 2018", "dtc": "P0171"},
-    {"vehicle": "Volkswagen Golf 2019", "dtc": "P0171"},
-    {"vehicle": "Ford Focus 2018", "dtc": "P0171"}
+    {
+      "vehicle": "Toyota Corolla 2018",
+      "dtc": "P0300"
+    },
+    {
+      "vehicle": "Toyota Corolla 2018",
+      "dtc": "P0301"
+    },
+    {
+      "vehicle": "Toyota Corolla 2018",
+      "dtc": "P0171"
+    },
+    {
+      "vehicle": "Toyota Corolla 2018",
+      "dtc": "P0172"
+    },
+    {
+      "vehicle": "Toyota Corolla 2018",
+      "dtc": "P0420"
+    },
+    {
+      "vehicle": "Toyota Corolla 2018",
+      "dtc": "P0100"
+    },
+    {
+      "vehicle": "Toyota Corolla 2018",
+      "dtc": "P0110"
+    },
+    {
+      "vehicle": "Toyota Corolla 2018",
+      "dtc": "P0128"
+    },
+    {
+      "vehicle": "Toyota Corolla 2018",
+      "dtc": "P0442"
+    },
+    {
+      "vehicle": "Toyota Corolla 2018",
+      "dtc": "P0455"
+    },
+    {
+      "vehicle": "Volkswagen Golf 2019",
+      "dtc": "P0300"
+    },
+    {
+      "vehicle": "Volkswagen Golf 2019",
+      "dtc": "P0301"
+    },
+    {
+      "vehicle": "Volkswagen Golf 2019",
+      "dtc": "P0171"
+    },
+    {
+      "vehicle": "Volkswagen Golf 2019",
+      "dtc": "P0172"
+    },
+    {
+      "vehicle": "Volkswagen Golf 2019",
+      "dtc": "P0420"
+    },
+    {
+      "vehicle": "Volkswagen Golf 2019",
+      "dtc": "P0100"
+    },
+    {
+      "vehicle": "Volkswagen Golf 2019",
+      "dtc": "P0110"
+    },
+    {
+      "vehicle": "Volkswagen Golf 2019",
+      "dtc": "P0128"
+    },
+    {
+      "vehicle": "Volkswagen Golf 2019",
+      "dtc": "P0442"
+    },
+    {
+      "vehicle": "Volkswagen Golf 2019",
+      "dtc": "P0455"
+    },
+    {
+      "vehicle": "Ford Focus 2018",
+      "dtc": "P0300"
+    },
+    {
+      "vehicle": "Ford Focus 2018",
+      "dtc": "P0301"
+    },
+    {
+      "vehicle": "Ford Focus 2018",
+      "dtc": "P0171"
+    },
+    {
+      "vehicle": "Ford Focus 2018",
+      "dtc": "P0172"
+    },
+    {
+      "vehicle": "Ford Focus 2018",
+      "dtc": "P0420"
+    },
+    {
+      "vehicle": "Ford Focus 2018",
+      "dtc": "P0100"
+    },
+    {
+      "vehicle": "Ford Focus 2018",
+      "dtc": "P0110"
+    },
+    {
+      "vehicle": "Ford Focus 2018",
+      "dtc": "P0128"
+    },
+    {
+      "vehicle": "Ford Focus 2018",
+      "dtc": "P0442"
+    },
+    {
+      "vehicle": "Ford Focus 2018",
+      "dtc": "P0455"
+    }
   ]
 }
