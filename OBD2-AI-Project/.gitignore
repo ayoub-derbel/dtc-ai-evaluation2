@@ -2,3 +2,8 @@ __pycache__/
 *.pyc
 .env
 results/responses.json
+results/responses_gpt.json
+results/responses_deepseek.json
+results/responses_report.pdf
+results/responses_gpt_report.pdf
+results/responses_deepseek_report.pdf

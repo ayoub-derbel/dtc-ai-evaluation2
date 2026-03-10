@@ -29,33 +29,44 @@ pip install -r requirements.txt
 ```
 
 ## Configure API keys
-Set both API keys directly in the script:
+Set the API keys directly in each script:
 
-1. Open `scripts/run_tests.py`
-2. Replace:
+- In `scripts/run_tests_gpt.py`, replace:
 
 ```python
 OPENROUTER_API_KEY = "REPLACE_WITH_YOUR_OPENROUTER_API_KEY"
+```
+
+- In `scripts/run_tests_deepseek.py`, replace:
+
+```python
 DEEPSEEK_API_KEY = "REPLACE_WITH_YOUR_DEEPSEEK_API_KEY"
 ```
 
-with your real keys.
-
 ## Run Benchmark Tests
-From inside the `OBD2-AI-Project` directory, run:
+From inside the `OBD2-AI-Project` directory, run one script per model:
 
+### GPT-4o (OpenRouter)
 ```bash
-python scripts/run_tests.py
+python scripts/run_tests_gpt.py
 ```
+Outputs:
+- `results/responses_gpt.json`
+- `results/responses_gpt_report.pdf`
 
-The script will:
+### DeepSeek R1 (DeepSeek direct API)
+```bash
+python scripts/run_tests_deepseek.py
+```
+Outputs:
+- `results/responses_deepseek.json`
+- `results/responses_deepseek_report.pdf`
+
+Both scripts:
 - load prompt strategies from `prompts/prompts.json`
 - load test cases from `dataset/dtc_tests.json`
-- send each prompt-test combination to two providers: OpenRouter (`openai/gpt-4o`) and DeepSeek direct API (`deepseek-reasoner`)
 - print detailed runtime logs
-- write all outputs to `results/responses.json` (including prompt, provider, model label, and API model for each response)
-- generate a readable PDF report at `results/responses_report.pdf` containing each prompt and associated response
-- on API errors (e.g., 402 Payment Required), asks whether to continue or stop and save partial outputs
+- ask whether to continue or stop on API errors (e.g., 402), then save partial outputs
 
 ## GitHub Push Commands
 After creating your GitHub repository, run:
