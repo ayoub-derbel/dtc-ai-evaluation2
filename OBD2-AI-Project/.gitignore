@@ -9,3 +9,5 @@ results/responses_gpt_report.pdf
 results/responses_deepseek_report.pdf
 results/responses_groq.json
 results/responses_groq_report.pdf
+results/responses_groq_mixtral.json
+results/responses_groq_mixtral_report.pdf

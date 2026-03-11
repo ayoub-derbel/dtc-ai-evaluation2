@@ -49,6 +49,12 @@ OPENROUTER_API_KEY = "REPLACE_WITH_YOUR_OPENROUTER_API_KEY"
 GROQ_API_KEY = "REPLACE_WITH_YOUR_GROQ_API_KEY"
 ```
 
+- In `scripts/run_tests_groq_mixtral.py`, replace:
+
+```python
+GROQ_API_KEY = "REPLACE_WITH_YOUR_GROQ_API_KEY"
+```
+
 ## Run Benchmark Tests
 From inside the `OBD2-AI-Project` directory, run one script per model:
 
@@ -76,6 +82,15 @@ python scripts/run_tests_groq.py
 Outputs:
 - `results/responses_groq.json`
 - `results/responses_groq_report.pdf`
+
+
+### Groq (Mixtral 8x7B)
+```bash
+python scripts/run_tests_groq_mixtral.py
+```
+Outputs:
+- `results/responses_groq_mixtral.json`
+- `results/responses_groq_mixtral_report.pdf`
 
 Both scripts:
 - load prompt strategies from `prompts/prompts.json`
