@@ -12,10 +12,8 @@ from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
 
 OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
-DEEPSEEK_URL = "https://api.deepseek.com/chat/completions"
 MAX_TOKENS = 1000
 OPENROUTER_API_KEY = "REPLACE_WITH_YOUR_OPENROUTER_API_KEY"
-DEEPSEEK_API_KEY = "REPLACE_WITH_YOUR_DEEPSEEK_API_KEY"
 MODEL_MATRIX = [
     {
         "label": "gpt-4o",
@@ -24,8 +22,8 @@ MODEL_MATRIX = [
     },
     {
         "label": "deepseek-reasoner",
-        "provider": "deepseek",
-        "api_model": "deepseek-reasoner",
+        "provider": "openrouter",
+        "api_model": "deepseek/deepseek-r1",
     },
 ]
 
@@ -54,28 +52,9 @@ def call_openrouter(api_key: str, prompt: str, model_name: str) -> str:
     return data["choices"][0]["message"]["content"].strip()
 
 
-def call_deepseek(api_key: str, prompt: str, model_name: str) -> str:
-    headers = {
-        "Authorization": f"Bearer {api_key}",
-        "Content-Type": "application/json",
-    }
-    payload = {
-        "model": model_name,
-        "max_tokens": MAX_TOKENS,
-        "messages": [{"role": "user", "content": prompt}],
-    }
-
-    response = requests.post(DEEPSEEK_URL, headers=headers, json=payload, timeout=60)
-    response.raise_for_status()
-    data = response.json()
-    return data["choices"][0]["message"]["content"].strip()
-
-
-def call_model(provider: str, prompt: str, model_name: str, openrouter_key: str, deepseek_key: str) -> str:
+def call_model(provider: str, prompt: str, model_name: str, openrouter_key: str) -> str:
     if provider == "openrouter":
         return call_openrouter(openrouter_key, prompt, model_name)
-    if provider == "deepseek":
-        return call_deepseek(deepseek_key, prompt, model_name)
     raise ValueError(f"Unsupported provider: {provider}")
 
 
@@ -174,9 +153,6 @@ def main() -> None:
     if not OPENROUTER_API_KEY or OPENROUTER_API_KEY == "REPLACE_WITH_YOUR_OPENROUTER_API_KEY":
         raise RuntimeError("Set OPENROUTER_API_KEY directly in scripts/run_tests.py before running tests.")
 
-    if not DEEPSEEK_API_KEY or DEEPSEEK_API_KEY == "REPLACE_WITH_YOUR_DEEPSEEK_API_KEY":
-        raise RuntimeError("Set DEEPSEEK_API_KEY directly in scripts/run_tests.py before running tests.")
-
     project_root = Path(__file__).resolve().parents[1]
     prompts_path = project_root / "prompts" / "prompts.json"
     tests_path = project_root / "dataset" / "dtc_tests.json"
@@ -229,7 +205,6 @@ def main() -> None:
                         prompt=prompt_text,
                         model_name=api_model,
                         openrouter_key=OPENROUTER_API_KEY,
-                        deepseek_key=DEEPSEEK_API_KEY,
                     )
                 except requests.RequestException as exc:
                     response_text = f"ERROR: {exc}"

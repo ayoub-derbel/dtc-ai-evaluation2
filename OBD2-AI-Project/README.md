@@ -29,7 +29,7 @@ pip install -r requirements.txt
 ```
 
 ## Configure API keys
-Set the API keys directly in each script:
+Set OpenRouter API key directly in each script (GPT and DeepSeek both use OpenRouter):
 
 - In `scripts/run_tests_gpt.py`, replace:
 
@@ -40,7 +40,7 @@ OPENROUTER_API_KEY = "REPLACE_WITH_YOUR_OPENROUTER_API_KEY"
 - In `scripts/run_tests_deepseek.py`, replace:
 
 ```python
-DEEPSEEK_API_KEY = "REPLACE_WITH_YOUR_DEEPSEEK_API_KEY"
+OPENROUTER_API_KEY = "REPLACE_WITH_YOUR_OPENROUTER_API_KEY"
 ```
 
 ## Run Benchmark Tests
@@ -54,7 +54,7 @@ Outputs:
 - `results/responses_gpt.json`
 - `results/responses_gpt_report.pdf`
 
-### DeepSeek R1 (DeepSeek direct API)
+### DeepSeek R1 (via OpenRouter)
 ```bash
 python scripts/run_tests_deepseek.py
 ```

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run OBD-II prompt benchmark with DeepSeek R1 via DeepSeek direct API."""
+"""Run OBD-II prompt benchmark with DeepSeek R1 via OpenRouter."""
 
 from __future__ import annotations
 
@@ -11,11 +11,11 @@ import requests
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
 
-DEEPSEEK_URL = "https://api.deepseek.com/chat/completions"
+OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
 MODEL_LABEL = "deepseek-reasoner"
-API_MODEL = "deepseek-reasoner"
+API_MODEL = "deepseek/deepseek-r1"
 MAX_TOKENS = 1000
-DEEPSEEK_API_KEY = "REPLACE_WITH_YOUR_DEEPSEEK_API_KEY"
+OPENROUTER_API_KEY = "REPLACE_WITH_YOUR_OPENROUTER_API_KEY"
 
 
 def load_json(path: Path) -> dict[str, Any]:
@@ -23,10 +23,12 @@ def load_json(path: Path) -> dict[str, Any]:
         return json.load(file)
 
 
-def call_deepseek(api_key: str, prompt: str) -> str:
+def call_openrouter(api_key: str, prompt: str) -> str:
     headers = {
         "Authorization": f"Bearer {api_key}",
         "Content-Type": "application/json",
+        "HTTP-Referer": "http://localhost",
+        "X-Title": "OBD2-AI-Test-DeepSeek",
     }
     payload = {
         "model": API_MODEL,
@@ -34,7 +36,7 @@ def call_deepseek(api_key: str, prompt: str) -> str:
         "messages": [{"role": "user", "content": prompt}],
     }
 
-    response = requests.post(DEEPSEEK_URL, headers=headers, json=payload, timeout=60)
+    response = requests.post(OPENROUTER_URL, headers=headers, json=payload, timeout=60)
     response.raise_for_status()
     data = response.json()
     return data["choices"][0]["message"]["content"].strip()
@@ -128,8 +130,8 @@ def save_outputs(results: list[dict[str, str]], results_path: Path, pdf_path: Pa
 
 
 def main() -> None:
-    if not DEEPSEEK_API_KEY or DEEPSEEK_API_KEY == "REPLACE_WITH_YOUR_DEEPSEEK_API_KEY":
-        raise RuntimeError("Set DEEPSEEK_API_KEY directly in scripts/run_tests_deepseek.py before running tests.")
+    if not OPENROUTER_API_KEY or OPENROUTER_API_KEY == "REPLACE_WITH_YOUR_OPENROUTER_API_KEY":
+        raise RuntimeError("Set OPENROUTER_API_KEY directly in scripts/run_tests_deepseek.py before running tests.")
 
     project_root = Path(__file__).resolve().parents[1]
     prompts = load_json(project_root / "prompts" / "prompts.json").get("prompts", [])
@@ -155,7 +157,7 @@ def main() -> None:
             print(f"Prompt: {prompt_id}")
             print(f"Vehicle: {vehicle}")
             print(f"DTC: {dtc_code}")
-            print(f"Provider: deepseek")
+            print(f"Provider: openrouter")
             print(f"Model label: {MODEL_LABEL}")
             print(f"API model: {API_MODEL}\n")
             print("Prompt sent:")
@@ -163,7 +165,7 @@ def main() -> None:
             print()
 
             try:
-                response_text = call_deepseek(DEEPSEEK_API_KEY, prompt_text)
+                response_text = call_openrouter(OPENROUTER_API_KEY, prompt_text)
             except requests.RequestException as exc:
                 response_text = f"ERROR: {exc}"
                 print("Response received:")
@@ -176,7 +178,7 @@ def main() -> None:
                         "prompt_template": prompt_template,
                         "vehicle": vehicle,
                         "dtc": dtc_code,
-                        "provider": "deepseek",
+                        "provider": "openrouter",
                         "model_label": MODEL_LABEL,
                         "api_model": API_MODEL,
                         "prompt": prompt_text,
@@ -200,7 +202,7 @@ def main() -> None:
                     "prompt_template": prompt_template,
                     "vehicle": vehicle,
                     "dtc": dtc_code,
-                    "provider": "deepseek",
+                    "provider": "openrouter",
                     "model_label": MODEL_LABEL,
                     "api_model": API_MODEL,
                     "prompt": prompt_text,
