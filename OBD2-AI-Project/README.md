@@ -29,7 +29,7 @@ pip install -r requirements.txt
 ```
 
 ## Configure API keys
-Set OpenRouter API key directly in each script (GPT and DeepSeek both use OpenRouter):
+Set API keys directly in scripts:
 
 - In `scripts/run_tests_gpt.py`, replace:
 
@@ -41,6 +41,12 @@ OPENROUTER_API_KEY = "REPLACE_WITH_YOUR_OPENROUTER_API_KEY"
 
 ```python
 OPENROUTER_API_KEY = "REPLACE_WITH_YOUR_OPENROUTER_API_KEY"
+```
+
+- In `scripts/run_tests_groq.py`, replace:
+
+```python
+GROQ_API_KEY = "REPLACE_WITH_YOUR_GROQ_API_KEY"
 ```
 
 ## Run Benchmark Tests
@@ -61,6 +67,15 @@ python scripts/run_tests_deepseek.py
 Outputs:
 - `results/responses_deepseek.json`
 - `results/responses_deepseek_report.pdf`
+
+
+### Groq (llama-3.3-70b-versatile)
+```bash
+python scripts/run_tests_groq.py
+```
+Outputs:
+- `results/responses_groq.json`
+- `results/responses_groq_report.pdf`
 
 Both scripts:
 - load prompt strategies from `prompts/prompts.json`

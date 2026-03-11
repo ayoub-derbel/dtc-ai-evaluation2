@@ -7,3 +7,5 @@ results/responses_deepseek.json
 results/responses_report.pdf
 results/responses_gpt_report.pdf
 results/responses_deepseek_report.pdf
+results/responses_groq.json
+results/responses_groq_report.pdf
