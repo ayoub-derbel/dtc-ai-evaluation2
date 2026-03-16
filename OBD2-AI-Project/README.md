@@ -144,5 +144,5 @@ Excel columns:
 - `GPT-4O`
 - `Llama-3.3-70B-Versatile`
 
-The script generates merged blocks by DTC and Prompt with template placeholders `[Résultat à insérer]` in model columns.
+The script generates merged blocks by DTC and Prompt and fills model columns with real responses loaded from `results/responses_gpt.json` and `results/responses_groq.json` (grouped by prompt and DTC across the 3 vehicles).
 
