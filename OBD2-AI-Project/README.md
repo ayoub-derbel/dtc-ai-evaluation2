@@ -135,14 +135,14 @@ python scripts/export_comparison_excel.py
 ```
 
 Output file:
-- `results/benchmark_comparison.xlsx`
+- `results/AI_Test_Benchmark.xlsx`
 
 Excel columns:
-- `Prompt ID`
-- `Vehicle`
 - `DTC`
-- `GPT-4o-mini`
-- `llama-3.3-70b-versatile`
+- `Prompt`
+- `Vehicle`
+- `GPT-4O`
+- `Llama-3.3-70B-Versatile`
 
-Each row corresponds to one combination: `Prompt ID + Vehicle + DTC`.
+The script generates merged blocks by DTC and Prompt with template placeholders `[Résultat à insérer]` in model columns.
 
