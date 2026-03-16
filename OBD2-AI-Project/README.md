@@ -121,3 +121,28 @@ git branch -M main
 git remote add origin <GITHUB_REPO_URL>
 git push -u origin main
 ```
+
+
+## Export comparison to Excel
+After running both scripts below:
+- `python scripts/run_tests_gpt.py`
+- `python scripts/run_tests_groq.py`
+
+Generate a comparison Excel file:
+
+```bash
+python scripts/export_comparison_excel.py
+```
+
+Output file:
+- `results/benchmark_comparison.xlsx`
+
+Excel columns:
+- `Prompt ID`
+- `Vehicle`
+- `DTC`
+- `GPT-4o-mini`
+- `llama-3.3-70b-versatile`
+
+Each row corresponds to one combination: `Prompt ID + Vehicle + DTC`.
+
