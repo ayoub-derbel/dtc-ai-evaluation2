@@ -107,6 +107,15 @@ Outputs:
 - `results/responses_groq_deepseek_distill.json`
 - `results/responses_groq_deepseek_distill_report.pdf`
 
+
+### OpenRouter (anthropic/claude-sonnet-4.5)
+```bash
+python scripts/run_tests_claude_sonnet.py
+```
+Outputs:
+- `results/responses_claude_sonnet.json`
+- `results/responses_claude_sonnet_report.pdf`
+
 Both scripts:
 - load prompt strategies from `prompts/prompts.json`
 - load test cases from `dataset/dtc_tests.json`

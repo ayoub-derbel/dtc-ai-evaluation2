@@ -15,3 +15,5 @@ results/responses_groq_deepseek_distill.json
 results/responses_groq_deepseek_distill_report.pdf
 results/benchmark_comparison.xlsx
 results/AI_Test_Benchmark.xlsx
+results/responses_claude_sonnet.json
+results/responses_claude_sonnet_report.pdf
