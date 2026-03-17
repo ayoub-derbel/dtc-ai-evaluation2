@@ -136,6 +136,7 @@ git push -u origin main
 After running both scripts below:
 - `python scripts/run_tests_gpt.py`
 - `python scripts/run_tests_groq.py`
+- `python scripts/run_tests_claude_sonnet.py`
 
 Generate a comparison Excel file:
 
@@ -152,6 +153,7 @@ Excel columns:
 - `Vehicle`
 - `GPT-4O`
 - `Llama-3.3-70B-Versatile`
+- `anthropic/claude-sonnet-4.5`
 
-The script generates merged blocks for `DTC` and `Prompt`, and writes real responses **per row combination** (`DTC + Prompt + Vehicle`) in `GPT-4O` and `Llama-3.3-70B-Versatile`. That means 12 distinct model results per DTC (4 prompts × 3 vehicles). If a result is missing, it writes `[Aucun résultat trouvé]`.
+The script generates merged blocks for `DTC` and `Prompt`, and writes real responses **per row combination** (`DTC + Prompt + Vehicle`) in `GPT-4O`, `Llama-3.3-70B-Versatile`, and `anthropic/claude-sonnet-4.5`. That means 12 distinct results per model for each DTC (4 prompts × 3 vehicles). If a result is missing, it writes `[Aucun résultat trouvé]`.
 

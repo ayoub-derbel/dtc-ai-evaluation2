@@ -78,15 +78,24 @@ def main() -> None:
     output_path = project_root / "results" / OUTPUT_FILENAME
     gpt_results_path = project_root / "results" / "responses_gpt.json"
     groq_results_path = project_root / "results" / "responses_groq.json"
+    claude_results_path = project_root / "results" / "responses_claude_sonnet.json"
 
     gpt_index = build_index(load_results(gpt_results_path))
     groq_index = build_index(load_results(groq_results_path))
+    claude_index = build_index(load_results(claude_results_path))
 
     wb = Workbook()
     ws = wb.active
     ws.title = SHEET_NAME
 
-    headers = ["DTC", "Prompt", "Vehicle", "GPT-4O", "Llama-3.3-70B-Versatile"]
+    headers = [
+        "DTC",
+        "Prompt",
+        "Vehicle",
+        "GPT-4O",
+        "Llama-3.3-70B-Versatile",
+        "anthropic/claude-sonnet-4.5",
+    ]
     ws.append(headers)
 
     current_row = 2
@@ -100,12 +109,14 @@ def main() -> None:
             for vehicle in VEHICLES:
                 gpt_response = gpt_index.get((prompt, vehicle, dtc), "[Aucun résultat trouvé]")
                 groq_response = groq_index.get((prompt, vehicle, dtc), "[Aucun résultat trouvé]")
+                claude_response = claude_index.get((prompt, vehicle, dtc), "[Aucun résultat trouvé]")
 
                 ws.cell(row=current_row, column=1, value=dtc)
                 ws.cell(row=current_row, column=2, value=prompt)
                 ws.cell(row=current_row, column=3, value=vehicle)
                 ws.cell(row=current_row, column=4, value=gpt_response)
                 ws.cell(row=current_row, column=5, value=groq_response)
+                ws.cell(row=current_row, column=6, value=claude_response)
                 current_row += 1
 
             prompt_end = current_row - 1
@@ -119,6 +130,7 @@ def main() -> None:
     ws.column_dimensions["C"].width = 20
     ws.column_dimensions["D"].width = 25
     ws.column_dimensions["E"].width = 25
+    ws.column_dimensions["F"].width = 28
 
     apply_style(ws)
 
